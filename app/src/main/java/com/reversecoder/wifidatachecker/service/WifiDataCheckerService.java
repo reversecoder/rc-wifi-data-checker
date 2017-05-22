@@ -33,7 +33,10 @@ import static com.reversecoder.wifidatachecker.util.AllConstants.KEY_INTENT_ACTI
 import static com.reversecoder.wifidatachecker.util.AllConstants.KEY_INTENT_BYTE_RECEIVED_PER_SECOND;
 import static com.reversecoder.wifidatachecker.util.AllConstants.KEY_INTENT_BYTE_SENT_PER_SECOND;
 
-public class GaugeService extends Service {
+/**
+ * @author Md. Rashadul Alam
+ */
+public class WifiDataCheckerService extends Service {
 
   Intent broadcastIntentActivityUpdate;
 
@@ -44,8 +47,6 @@ public class GaugeService extends Service {
 
   private Notification.Builder mBuilder;
   private NotificationManager mNotifyMgr;
-
-//  private SharedPreferences sharedPref;
 
   private UnitConverter converter;
 

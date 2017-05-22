@@ -1,6 +1,5 @@
 package com.reversecoder.wifidatachecker.activity;
 
-import android.app.ActivityManager;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -13,10 +12,13 @@ import android.widget.Button;
 import android.widget.TextView;
 
 import com.reversecoder.wifidatachecker.R;
-import com.reversecoder.wifidatachecker.service.GaugeService;
+import com.reversecoder.wifidatachecker.service.WifiDataCheckerService;
 import com.reversecoder.wifidatachecker.util.AllConstants;
 import com.reversecoder.wifidatachecker.util.SessionManager;
 
+/**
+ * @author Md. Rashadul Alam
+ */
 public class MainActivity extends AppCompatActivity {
 
     Button btnStart, btnStop;
@@ -53,12 +55,13 @@ public class MainActivity extends AppCompatActivity {
         super.onPause();
         unregisterReceiver(broadcastReceiver);
     }
+
     private void updateUI(Intent intent) {
         String strByteSent = intent.getStringExtra(AllConstants.KEY_INTENT_BYTE_SENT_PER_SECOND);
         String strByteReceived = intent.getStringExtra(AllConstants.KEY_INTENT_BYTE_RECEIVED_PER_SECOND);
         String strActiveApp = intent.getStringExtra(AllConstants.KEY_INTENT_ACTIVE_APP);
 
-        tvWifiData.setText("Active app: "+strActiveApp+"\n"+"Byte sent: "+strByteSent+"\n"+"Byte received: "+strByteReceived);
+        tvWifiData.setText("Active app: " + strActiveApp + "\n" + "Byte sent: " + strByteSent + "\n" + "Byte received: " + strByteReceived);
     }
 
     private void setApplicationBasicSettings() {
@@ -86,7 +89,7 @@ public class MainActivity extends AppCompatActivity {
         btnStart.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent intent = new Intent(getApplicationContext(), GaugeService.class);
+                Intent intent = new Intent(getApplicationContext(), WifiDataCheckerService.class);
                 startService(intent);
             }
         });
@@ -94,27 +97,14 @@ public class MainActivity extends AppCompatActivity {
         btnStop.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent intent = new Intent(getApplicationContext(), GaugeService.class);
+                Intent intent = new Intent(getApplicationContext(), WifiDataCheckerService.class);
                 stopService(intent);
             }
         });
     }
 
-
     private void restartService() {
-        stopService(new Intent(MainActivity.this, GaugeService.class));
-        startService(new Intent(MainActivity.this, GaugeService.class));
-    }
-
-    private boolean isMyServiceRunning(Class<?> serviceClass) {
-        ActivityManager manager =
-                (ActivityManager) MainActivity.this.getSystemService(Context.ACTIVITY_SERVICE);
-        for (ActivityManager.RunningServiceInfo service : manager.getRunningServices(
-                Integer.MAX_VALUE)) {
-            if (serviceClass.getName().equals(service.service.getClassName())) {
-                return true;
-            }
-        }
-        return false;
+        stopService(new Intent(MainActivity.this, WifiDataCheckerService.class));
+        startService(new Intent(MainActivity.this, WifiDataCheckerService.class));
     }
 }

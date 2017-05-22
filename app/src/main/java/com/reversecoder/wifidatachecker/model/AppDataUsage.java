@@ -2,6 +2,9 @@ package com.reversecoder.wifidatachecker.model;
 
 import android.net.TrafficStats;
 
+/**
+ * @author Md. Rashadul Alam
+ */
 public class AppDataUsage {
 
   private final String appName;
