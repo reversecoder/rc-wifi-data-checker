@@ -5,6 +5,9 @@ import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 
+/**
+ * @author Md. Rashadul Alam
+ */
 public class MotionEventListener implements SensorEventListener {
 
     private static final float MIN_FORCE = (float) 0.25;

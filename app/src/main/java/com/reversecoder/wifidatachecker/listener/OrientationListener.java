@@ -7,6 +7,9 @@ import android.view.OrientationEventListener;
 
 import static com.reversecoder.wifidatachecker.util.AllConstants.MINTIMETOREFRESH_MOTION_TO_NOMOTION;
 
+/**
+ * @author Md. Rashadul Alam
+ */
 public class OrientationListener extends OrientationEventListener {
 
     private boolean isMotionOn = false;

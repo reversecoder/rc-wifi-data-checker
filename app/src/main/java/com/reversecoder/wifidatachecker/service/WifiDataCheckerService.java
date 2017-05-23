@@ -135,8 +135,8 @@ public class WifiDataCheckerService extends Service {
     public void onDestroy() {
         try {
             updateHandler.cancel(true);
+            OrientationListener.getInstance(this, SensorManager.SENSOR_DELAY_UI).disable();
         } catch (NullPointerException e) {
-            //The only way there will be a null pointer, is if the disabled preference is checked. Because if it is, onDestory() is called right away, without creating the updateHandler
         }
         super.onDestroy();
     }

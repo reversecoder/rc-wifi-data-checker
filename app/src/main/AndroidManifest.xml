@@ -3,6 +3,8 @@
     package="com.reversecoder.wifidatachecker">
 
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
+    <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
+    <uses-permission android:name="android.permission.CHANGE_WIFI_STATE" />
 
     <application
         android:name="com.reversecoder.wifidatachecker.application.WifiDataCheckerApplication"

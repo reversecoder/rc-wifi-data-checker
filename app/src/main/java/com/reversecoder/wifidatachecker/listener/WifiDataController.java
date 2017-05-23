@@ -3,6 +3,7 @@ package com.reversecoder.wifidatachecker.listener;
 import android.content.Context;
 import android.hardware.Sensor;
 import android.hardware.SensorManager;
+import android.net.wifi.WifiManager;
 import android.widget.Toast;
 
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -10,6 +11,9 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import static com.reversecoder.wifidatachecker.util.AllConstants.MINTIMETOREFRESH_MOTION_TO_NOMOTION;
 import static com.reversecoder.wifidatachecker.util.AllConstants.MINTIMETOREFRESH_TILT_TO_NOMOTION;
 
+/**
+ * @author Md. Rashadul Alam
+ */
 public class WifiDataController {
 
     private final SensorManager mSensorManager;
@@ -32,6 +36,8 @@ public class WifiDataController {
 
     private static AtomicBoolean mAutoSet;
 
+    WifiManager wifiManager = null;
+
     public WifiDataController(Context ctx) {
         // TODO Auto-generated constructor stub
         context = ctx;
@@ -49,7 +55,6 @@ public class WifiDataController {
             mAutoSet = new AtomicBoolean();
         }
         return self;
-
     }
 
     public void startAutoMode() {
@@ -109,5 +114,34 @@ public class WifiDataController {
 
         }
     };
+
+    public void enableWifi() {
+        if (wifiManager == null) {
+            wifiManager = (WifiManager) context.getSystemService(Context.WIFI_SERVICE);
+        }
+        if (wifiManager.getWifiState() == WifiManager.WIFI_STATE_DISABLED) {
+            wifiManager.setWifiEnabled(true);
+        }
+
+    }
+
+    public void disableWifi() {
+        if (wifiManager == null) {
+            wifiManager = (WifiManager) context.getSystemService(Context.WIFI_SERVICE);
+        }
+        if (wifiManager.getWifiState() == WifiManager.WIFI_STATE_ENABLED) {
+            wifiManager.setWifiEnabled(false);
+        }
+    }
+
+    public boolean isWifiEnable() {
+        if (wifiManager == null) {
+            wifiManager = (WifiManager) context.getSystemService(Context.WIFI_SERVICE);
+        }
+        if (wifiManager.getWifiState() == WifiManager.WIFI_STATE_ENABLED) {
+            return true;
+        }
+        return false;
+    }
 
 }
