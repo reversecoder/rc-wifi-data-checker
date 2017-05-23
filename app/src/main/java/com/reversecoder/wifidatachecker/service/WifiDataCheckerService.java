@@ -7,6 +7,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
+import android.hardware.SensorManager;
 import android.net.TrafficStats;
 import android.os.Build;
 import android.os.Bundle;
@@ -15,6 +16,7 @@ import android.os.PowerManager;
 
 import com.reversecoder.wifidatachecker.R;
 import com.reversecoder.wifidatachecker.interfaces.UnitConverter;
+import com.reversecoder.wifidatachecker.listener.OrientationListener;
 import com.reversecoder.wifidatachecker.model.AppDataUsage;
 import com.reversecoder.wifidatachecker.util.AllConstants;
 import com.reversecoder.wifidatachecker.util.SessionManager;
@@ -161,6 +163,9 @@ public class WifiDataCheckerService extends Service {
             //                loadAllAppsIntoAppDataUsageList();
             //            }
         }
+
+        OrientationListener.getInstance(this, SensorManager.SENSOR_DELAY_UI).enable();
+
         return START_STICKY;
     }
 

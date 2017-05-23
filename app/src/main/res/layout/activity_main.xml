@@ -52,4 +52,13 @@
                 android:text="Stop" />
         </LinearLayout>
     </LinearLayout>
+
+    <TextView
+        android:id="@+id/tv_sensor_position"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_centerHorizontal="true"
+        android:layout_margin="50dp"
+        android:text="@string/waiting" />
 </RelativeLayout>

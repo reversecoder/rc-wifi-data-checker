@@ -1,15 +1,19 @@
 package com.reversecoder.wifidatachecker.activity;
 
+import android.app.ActivityManager;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.hardware.Sensor;
+import android.hardware.SensorManager;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.reversecoder.wifidatachecker.R;
 import com.reversecoder.wifidatachecker.service.WifiDataCheckerService;
@@ -21,8 +25,10 @@ import com.reversecoder.wifidatachecker.util.SessionManager;
  */
 public class MainActivity extends AppCompatActivity {
 
+    private SensorManager sensorManager;
+    private Sensor sensor;
     Button btnStart, btnStop;
-    TextView tvWifiData;
+    TextView tvWifiData, tvSersorPosition;
 
     public BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
         @Override
@@ -42,18 +48,6 @@ public class MainActivity extends AppCompatActivity {
 
         initActions();
 
-    }
-
-    @Override
-    public void onResume() {
-        super.onResume();
-        registerReceiver(broadcastReceiver, new IntentFilter(AllConstants.INTENT_FILTER_ACTIVITY_UPDATE));
-    }
-
-    @Override
-    public void onPause() {
-        super.onPause();
-        unregisterReceiver(broadcastReceiver);
     }
 
     private void updateUI(Intent intent) {
@@ -83,22 +77,31 @@ public class MainActivity extends AppCompatActivity {
         tvWifiData = (TextView) findViewById(R.id.tv_wifi_data);
         btnStart = (Button) findViewById(R.id.btn_start);
         btnStop = (Button) findViewById(R.id.btn_stop);
+        tvSersorPosition = (TextView) findViewById(R.id.tv_sensor_position);
     }
 
     private void initActions() {
         btnStart.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent intent = new Intent(getApplicationContext(), WifiDataCheckerService.class);
-                startService(intent);
+                if (!isServiceRunning(WifiDataCheckerService.class)) {
+                    Intent intent = new Intent(getApplicationContext(), WifiDataCheckerService.class);
+                    startService(intent);
+                } else {
+                    Toast.makeText(MainActivity.this, "Service is running", Toast.LENGTH_SHORT).show();
+                }
             }
         });
 
         btnStop.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent intent = new Intent(getApplicationContext(), WifiDataCheckerService.class);
-                stopService(intent);
+                if (isServiceRunning(WifiDataCheckerService.class)) {
+                    Intent intent = new Intent(getApplicationContext(), WifiDataCheckerService.class);
+                    stopService(intent);
+                } else {
+                    Toast.makeText(MainActivity.this, "Please start the service first", Toast.LENGTH_SHORT).show();
+                }
             }
         });
     }
@@ -106,5 +109,37 @@ public class MainActivity extends AppCompatActivity {
     private void restartService() {
         stopService(new Intent(MainActivity.this, WifiDataCheckerService.class));
         startService(new Intent(MainActivity.this, WifiDataCheckerService.class));
+    }
+
+    private boolean isServiceRunning(Class<?> serviceClass) {
+        ActivityManager manager =
+                (ActivityManager) MainActivity.this.getSystemService(Context.ACTIVITY_SERVICE);
+        for (ActivityManager.RunningServiceInfo service : manager.getRunningServices(
+                Integer.MAX_VALUE)) {
+            if (serviceClass.getName().equals(service.service.getClassName())) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        try {
+            registerReceiver(broadcastReceiver, new IntentFilter(AllConstants.INTENT_FILTER_ACTIVITY_UPDATE));
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        try {
+            unregisterReceiver(broadcastReceiver);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 }
