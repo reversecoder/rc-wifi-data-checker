@@ -16,7 +16,7 @@ public class PackageWatcherBroadcastReceiver extends BroadcastReceiver {
 
     @Override
     public void onReceive(Context context, Intent intent) {
-        boolean notificationEnabled = !SessionManager.getBooleanSetting(context, AllConstants.SESSION_KEY_DISABLE_REPORTING_TO_NOTIFICATION, false);
+        boolean notificationEnabled = !SessionManager.getBooleanSetting(context, AllConstants.SESSION_KEY_AUTO_START, false);
         if (!notificationEnabled) {
             return;
         }

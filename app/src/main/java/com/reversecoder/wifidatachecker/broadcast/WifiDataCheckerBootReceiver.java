@@ -16,7 +16,7 @@ public class WifiDataCheckerBootReceiver extends BroadcastReceiver {
     @Override
     public void onReceive(Context context, Intent intent) {
         //this will always autostart and at least check if notification enabled, if not, it destroys
-        boolean autoStart = !(SessionManager.getBooleanSetting(context, AllConstants.SESSION_KEY_DISABLE_REPORTING_TO_NOTIFICATION, false));
+        boolean autoStart = !(SessionManager.getBooleanSetting(context, AllConstants.SESSION_KEY_AUTO_START, false));
         if (autoStart) {
             Intent startServiceIntent = new Intent(context, WifiDataCheckerService.class);
             context.startService(startServiceIntent);
