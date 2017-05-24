@@ -1,7 +1,6 @@
 package com.reversecoder.wifidatachecker.listener;
 
 import android.content.Context;
-import android.os.Handler;
 import android.util.Log;
 import android.view.OrientationEventListener;
 
@@ -16,15 +15,16 @@ public class OrientationListener extends OrientationEventListener {
 
     private long lastTime = 0;
 
-    WifiDataController wifiControllerMotion;
-
-    final Handler handler = new Handler();
+    WifiDataController wifiDataController;
 
     private static OrientationListener self = null;
 
+    Context mContext;
+
     public OrientationListener(Context context, int rate) {
         super(context, rate);
-        wifiControllerMotion = WifiDataController.getInstance(context);
+        mContext = context;
+        wifiDataController = WifiDataController.getInstance(context);
     }
 
     public static OrientationListener getInstance(Context context, int rate) {
@@ -44,17 +44,17 @@ public class OrientationListener extends OrientationEventListener {
                 || (orientation >= 320 && orientation <= 359)) {
             if (isMotionOn) {
 
-                wifiControllerMotion.stopAutoMode();
+                wifiDataController.stopAutoMode();
                 if ((System.currentTimeMillis() - lastTime) > MINTIMETOREFRESH_MOTION_TO_NOMOTION) {
 
                 }
                 isMotionOn = false;
             }
         } else {
-            if (isMotionOn == false) {
+            if (!isMotionOn) {
                 lastTime = System.currentTimeMillis();
-                wifiControllerMotion.isWifiOnNoMotion = true;
-                wifiControllerMotion.startAutoMode();
+                wifiDataController.isWifiOnNoMotion = true;
+                wifiDataController.startAutoMode();
                 isMotionOn = true;
             }
         }
@@ -66,7 +66,7 @@ public class OrientationListener extends OrientationEventListener {
             super.enable();
         } catch (Exception e) {
         }
-        wifiControllerMotion.startAutoMode();
+        wifiDataController.startAutoMode();
         isMotionOn = true;
     }
 
@@ -77,6 +77,13 @@ public class OrientationListener extends OrientationEventListener {
         } catch (Exception e) {
             e.printStackTrace();
         }
-        wifiControllerMotion.stopAutoMode();
+        wifiDataController.stopAutoMode();
+    }
+
+    public WifiDataController getWifiDataController() {
+        if (wifiDataController == null) {
+            wifiDataController = WifiDataController.getInstance(mContext);
+        }
+        return wifiDataController;
     }
 }

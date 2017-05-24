@@ -5,6 +5,8 @@ import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 
+import com.reversecoder.wifidatachecker.interfaces.MotionChangeListener;
+
 /**
  * @author Md. Rashadul Alam
  */

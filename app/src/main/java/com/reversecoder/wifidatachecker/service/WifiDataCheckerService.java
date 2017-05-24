@@ -13,8 +13,10 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.os.PowerManager;
+import android.widget.Toast;
 
 import com.reversecoder.wifidatachecker.R;
+import com.reversecoder.wifidatachecker.interfaces.OnTiltCallback;
 import com.reversecoder.wifidatachecker.interfaces.UnitConverter;
 import com.reversecoder.wifidatachecker.listener.OrientationListener;
 import com.reversecoder.wifidatachecker.model.AppDataUsage;
@@ -36,7 +38,7 @@ import static com.reversecoder.wifidatachecker.util.AllConstants.KEY_INTENT_BYTE
 /**
  * @author Md. Rashadul Alam
  */
-public class WifiDataCheckerService extends Service {
+public class WifiDataCheckerService extends Service implements OnTiltCallback {
 
     Intent broadcastIntentActivityUpdate;
 
@@ -70,6 +72,14 @@ public class WifiDataCheckerService extends Service {
     private double totalSecondsSinceLastPackageRefresh = 0d;
     private double totalSecondsSinceNotificaitonTimeUpdated = 0d;
 
+    OrientationListener orientationListener;
+
+    boolean isWifiDisabled = false;
+
+    boolean isNoTilt = false;
+
+    double mBytesReceivedPerSecond = 0.0;
+
     @Override
     public void onCreate() {
         super.onCreate();
@@ -78,6 +88,8 @@ public class WifiDataCheckerService extends Service {
 
     private void createService(final Service service) {
         firstUpdate = true;
+
+        orientationListener = OrientationListener.getInstance(this, SensorManager.SENSOR_DELAY_UI);
 
         broadcastIntentActivityUpdate = new Intent(INTENT_FILTER_ACTIVITY_UPDATE);
 
@@ -135,7 +147,7 @@ public class WifiDataCheckerService extends Service {
     public void onDestroy() {
         try {
             updateHandler.cancel(true);
-            OrientationListener.getInstance(this, SensorManager.SENSOR_DELAY_UI).disable();
+            orientationListener.disable();
         } catch (NullPointerException e) {
         }
         super.onDestroy();
@@ -164,7 +176,8 @@ public class WifiDataCheckerService extends Service {
             //            }
         }
 
-        OrientationListener.getInstance(this, SensorManager.SENSOR_DELAY_UI).enable();
+        orientationListener.enable();
+        orientationListener.getWifiDataController().setOnTiltCallback(this);
 
         return START_STICKY;
     }
@@ -337,6 +350,7 @@ public class WifiDataCheckerService extends Service {
             }
         }
 
+        //send update to the notification bar
         if (notificationEnabled) {
             updateNotification(bytesSentPerSecond, bytesReceivedPerSecond, activeApp);
         }
@@ -348,12 +362,42 @@ public class WifiDataCheckerService extends Service {
     private void sendUpdateToActivity(double bytesSentPerSecond, double bytesReceivedPerSecond, String activeApp) {
         String sentString = String.format("%.3f", (converter.convert(bytesSentPerSecond)));
         String receivedString = String.format("%.3f", (converter.convert(bytesReceivedPerSecond)));
+        try {
+            mBytesReceivedPerSecond = Double.parseDouble(receivedString);
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        }
 
         broadcastIntentActivityUpdate.putExtra(KEY_INTENT_BYTE_SENT_PER_SECOND, sentString + " " + unitMeasurement);
         broadcastIntentActivityUpdate.putExtra(KEY_INTENT_BYTE_RECEIVED_PER_SECOND, receivedString + " " + unitMeasurement);
         broadcastIntentActivityUpdate.putExtra(KEY_INTENT_ACTIVE_APP, activeApp);
         sendBroadcast(broadcastIntentActivityUpdate);
+
+        if(isNoTilt){
+            if (mBytesReceivedPerSecond < 4) {
+                if (orientationListener.getWifiDataController().isWifiEnable()) {
+                    orientationListener.getWifiDataController().disableWifi();
+                    isWifiDisabled = true;
+                }
+            }
+        }
     }
+
+    @Override
+    public void getTiltCallback(boolean isOrientationChanged) {
+
+        isNoTilt = isOrientationChanged;
+
+        if (isOrientationChanged) {
+            Toast.makeText(this, "No tilt", Toast.LENGTH_SHORT).show();
+        }else{
+            Toast.makeText(this, "Tilt", Toast.LENGTH_SHORT).show();
+            if (!orientationListener.getWifiDataController().isWifiEnable() && isWifiDisabled) {
+                orientationListener.getWifiDataController().enableWifi();
+                isWifiDisabled = false;
+            }
+        }
+  }
 
     private void updateNotification(double bytesSentPerSecond, double bytesReceivedPerSecond, String activeApp) {
 

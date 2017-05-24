@@ -1,4 +1,4 @@
-package com.reversecoder.wifidatachecker.listener;
+package com.reversecoder.wifidatachecker.interfaces;
 
 /**
  * @author Md. Rashadul Alam

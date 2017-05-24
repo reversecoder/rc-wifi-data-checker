@@ -4,7 +4,9 @@ import android.content.Context;
 import android.hardware.Sensor;
 import android.hardware.SensorManager;
 import android.net.wifi.WifiManager;
-import android.widget.Toast;
+
+import com.reversecoder.wifidatachecker.interfaces.MotionChangeListener;
+import com.reversecoder.wifidatachecker.interfaces.OnTiltCallback;
 
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -36,20 +38,25 @@ public class WifiDataController {
 
     private static AtomicBoolean mAutoSet;
 
+    private AtomicBoolean mIsNoTilt;
+
     WifiManager wifiManager = null;
+
+    OnTiltCallback mOnTiltCallback;
 
     public WifiDataController(Context ctx) {
         // TODO Auto-generated constructor stub
         context = ctx;
         mMotionEventListener = MotionEventListener.getInstance();
         mSensorManager = (SensorManager) context.getSystemService(Context.SENSOR_SERVICE);
-
+        if (mIsNoTilt == null) {
+            mIsNoTilt = new AtomicBoolean();
+        }
     }
 
     public static WifiDataController getInstance(Context context) {
         if (self == null) {
             self = new WifiDataController(context);
-
         }
         if (mAutoSet == null) {
             mAutoSet = new AtomicBoolean();
@@ -64,7 +71,6 @@ public class WifiDataController {
         mSensorManager.registerListener(mMotionEventListener,
                 mSensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER),
                 SensorManager.SENSOR_DELAY_UI);
-
         mMotionEventListener.setMotionListener(motionChangeListener);
 
     }
@@ -80,6 +86,10 @@ public class WifiDataController {
         lastTime = 0;
     }
 
+    public void setOnTiltCallback(OnTiltCallback onTiltCallback) {
+        mOnTiltCallback = onTiltCallback;
+    }
+
     MotionChangeListener motionChangeListener = new MotionChangeListener() {
         @Override
         public void onMotionChange() {
@@ -89,8 +99,11 @@ public class WifiDataController {
                 wasNoMotion = false;
                 isWifiOnNoMotion = true;
 
+                mIsNoTilt.set(Boolean.FALSE);
+                if (mOnTiltCallback != null) {
+                    mOnTiltCallback.getTiltCallback(mIsNoTilt.get());
+                }
             }
-
         }
 
         @Override
@@ -102,18 +115,27 @@ public class WifiDataController {
             if (isWifiOnNoMotion
                     && (System.currentTimeMillis() - registerLastTime) > MINTIMETOREFRESH_TILT_TO_NOMOTION) {
 
-                Toast.makeText(context, "Tilt to no motion", Toast.LENGTH_SHORT).show();
+//                Toast.makeText(context, "Tilt to no motion", Toast.LENGTH_SHORT).show();
 
                 isWifiOnNoMotion = false;
                 if (lastTime != 0
                         && (System.currentTimeMillis() - lastTime) > MINTIMETOREFRESH_MOTION_TO_NOMOTION) {
                     isWifiOnMotion = true;
                     wasNoMotion = true;
+
+                    mIsNoTilt.set(Boolean.TRUE);
+                    if (mOnTiltCallback != null) {
+                        mOnTiltCallback.getTiltCallback(mIsNoTilt.get());
+                    }
                 }
             }
 
         }
     };
+
+    public boolean isNoTilt() {
+        return mIsNoTilt.get();
+    }
 
     public void enableWifi() {
         if (wifiManager == null) {
@@ -122,7 +144,6 @@ public class WifiDataController {
         if (wifiManager.getWifiState() == WifiManager.WIFI_STATE_DISABLED) {
             wifiManager.setWifiEnabled(true);
         }
-
     }
 
     public void disableWifi() {
