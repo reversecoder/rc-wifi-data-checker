@@ -7,7 +7,6 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.hardware.Sensor;
 import android.hardware.SensorManager;
-import android.net.wifi.WifiManager;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
@@ -20,6 +19,7 @@ import com.reversecoder.wifidatachecker.R;
 import com.reversecoder.wifidatachecker.service.WifiDataCheckerService;
 import com.reversecoder.wifidatachecker.util.AllConstants;
 import com.reversecoder.wifidatachecker.util.SessionManager;
+import com.reversecoder.wifidatachecker.util.WifiDataCheckerUtil;
 
 /**
  * @author Md. Rashadul Alam
@@ -29,7 +29,7 @@ public class MainActivity extends AppCompatActivity {
     private SensorManager sensorManager;
     private Sensor sensor;
     Button btnStart, btnStop;
-    TextView tvWifiData, tvSersorPosition;
+    TextView tvNetworkType, tvSendingSpeed, tvActiveApp, tvReceivingSpeed, tvMotionPosition;
 
     public BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
         @Override
@@ -52,11 +52,19 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void updateUI(Intent intent) {
+        String strActiveApp = intent.getStringExtra(AllConstants.KEY_INTENT_ACTIVE_APP);
         String strByteSent = intent.getStringExtra(AllConstants.KEY_INTENT_BYTE_SENT_PER_SECOND);
         String strByteReceived = intent.getStringExtra(AllConstants.KEY_INTENT_BYTE_RECEIVED_PER_SECOND);
-        String strActiveApp = intent.getStringExtra(AllConstants.KEY_INTENT_ACTIVE_APP);
+        String strMotion = intent.getStringExtra(AllConstants.KEY_INTENT_MOTION);
 
-        tvWifiData.setText("Active app: " + strActiveApp + "\n" + "Byte sent: " + strByteSent + "\n" + "Byte received: " + strByteReceived);
+        tvActiveApp.setText(strActiveApp);
+        tvSendingSpeed.setText(strByteSent);
+        tvReceivingSpeed.setText(strByteReceived);
+        tvSendingSpeed.setText(strByteSent);
+        tvMotionPosition.setText(strMotion);
+        tvNetworkType.setText(WifiDataCheckerUtil.checkNetworkStatus(MainActivity.this));
+
+//        tvWifiData.setText("Active app: " + strActiveApp + "\n" + "Byte sent: " + strByteSent + "\n" + "Byte received: " + strByteReceived);
     }
 
     private void setApplicationBasicSettings() {
@@ -75,10 +83,16 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void initUI() {
-        tvWifiData = (TextView) findViewById(R.id.tv_wifi_data);
+        tvNetworkType = (TextView) findViewById(R.id.tv_network_type);
+        tvActiveApp = (TextView) findViewById(R.id.tv_active_app);
+        tvSendingSpeed = (TextView) findViewById(R.id.tv_sending_speed);
+        tvReceivingSpeed = (TextView) findViewById(R.id.tv_receiving_speed);
+        tvMotionPosition = (TextView) findViewById(R.id.tv_motion_position);
+
         btnStart = (Button) findViewById(R.id.btn_start);
         btnStop = (Button) findViewById(R.id.btn_stop);
-        tvSersorPosition = (TextView) findViewById(R.id.tv_sensor_position);
+
+        tvNetworkType.setText(WifiDataCheckerUtil.checkNetworkStatus(MainActivity.this));
     }
 
     private void initActions() {

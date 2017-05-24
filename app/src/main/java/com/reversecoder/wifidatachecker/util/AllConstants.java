@@ -16,6 +16,7 @@ public class AllConstants {
     public static final String KEY_INTENT_BYTE_SENT_PER_SECOND = "KEY_INTENT_BYTE_SENT_PER_SECOND";
     public static final String KEY_INTENT_BYTE_RECEIVED_PER_SECOND = "KEY_INTENT_BYTE_RECEIVED_PER_SECOND";
     public static final String KEY_INTENT_ACTIVE_APP = "KEY_INTENT_ACTIVE_APP";
+    public static final String KEY_INTENT_MOTION = "KEY_INTENT_MOTION";
 
     public static final int MINTIMETOREFRESH_TILT_TO_NOMOTION = 4000;
     public static final int MINTIMETOREFRESH_MOTION_TO_NOMOTION = 1500;

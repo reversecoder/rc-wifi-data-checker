@@ -1,7 +1,18 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-  <string name="app_name" translatable="false">rc-wifidatachecker</string>
-  <string name="waiting">Waiting...</string>
+    <string name="app_name" translatable="false">rc-wifidatachecker</string>
+    <string name="waiting">Waiting...</string>
+
+    <string name="title_active_network">Active Network</string>
+    <string name="title_data_transmission">Data Transmission</string>
+    <string name="title_device_position">Device Position</string>
+    <string name="title_network_type">Network Type:</string>
+
+    <string name="txt_none">None</string>
+    <string name="title_active_app">Active App:</string>
+    <string name="title_sending_speed">Sending Speed:</string>
+    <string name="title_receiving_speed">Receiving Speed:</string>
+    <string name="title_motion_position">Motion:</string>
 
 </resources>

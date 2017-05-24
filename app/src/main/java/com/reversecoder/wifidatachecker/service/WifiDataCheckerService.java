@@ -13,7 +13,6 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.os.PowerManager;
-import android.widget.Toast;
 
 import com.reversecoder.wifidatachecker.R;
 import com.reversecoder.wifidatachecker.interfaces.OnTiltCallback;
@@ -34,6 +33,7 @@ import static com.reversecoder.wifidatachecker.util.AllConstants.INTENT_FILTER_A
 import static com.reversecoder.wifidatachecker.util.AllConstants.KEY_INTENT_ACTIVE_APP;
 import static com.reversecoder.wifidatachecker.util.AllConstants.KEY_INTENT_BYTE_RECEIVED_PER_SECOND;
 import static com.reversecoder.wifidatachecker.util.AllConstants.KEY_INTENT_BYTE_SENT_PER_SECOND;
+import static com.reversecoder.wifidatachecker.util.AllConstants.KEY_INTENT_MOTION;
 
 /**
  * @author Md. Rashadul Alam
@@ -371,9 +371,14 @@ public class WifiDataCheckerService extends Service implements OnTiltCallback {
         broadcastIntentActivityUpdate.putExtra(KEY_INTENT_BYTE_SENT_PER_SECOND, sentString + " " + unitMeasurement);
         broadcastIntentActivityUpdate.putExtra(KEY_INTENT_BYTE_RECEIVED_PER_SECOND, receivedString + " " + unitMeasurement);
         broadcastIntentActivityUpdate.putExtra(KEY_INTENT_ACTIVE_APP, activeApp);
+        if (isNoTilt) {
+            broadcastIntentActivityUpdate.putExtra(KEY_INTENT_MOTION, "No Tilt");
+        } else {
+            broadcastIntentActivityUpdate.putExtra(KEY_INTENT_MOTION, "Tilt");
+        }
         sendBroadcast(broadcastIntentActivityUpdate);
 
-        if(isNoTilt){
+        if (isNoTilt) {
             if (mBytesReceivedPerSecond < 4) {
                 if (orientationListener.getWifiDataController().isWifiEnable()) {
                     orientationListener.getWifiDataController().disableWifi();
@@ -389,15 +394,15 @@ public class WifiDataCheckerService extends Service implements OnTiltCallback {
         isNoTilt = isOrientationChanged;
 
         if (isOrientationChanged) {
-            Toast.makeText(this, "No tilt", Toast.LENGTH_SHORT).show();
-        }else{
-            Toast.makeText(this, "Tilt", Toast.LENGTH_SHORT).show();
+//            Toast.makeText(this, "No tilt", Toast.LENGTH_SHORT).show();
+        } else {
+//            Toast.makeText(this, "Tilt", Toast.LENGTH_SHORT).show();
             if (!orientationListener.getWifiDataController().isWifiEnable() && isWifiDisabled) {
                 orientationListener.getWifiDataController().enableWifi();
                 isWifiDisabled = false;
             }
         }
-  }
+    }
 
     private void updateNotification(double bytesSentPerSecond, double bytesReceivedPerSecond, String activeApp) {
 
