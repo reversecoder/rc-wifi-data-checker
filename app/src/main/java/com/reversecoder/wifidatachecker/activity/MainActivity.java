@@ -35,7 +35,7 @@ public class MainActivity extends AppCompatActivity {
     private SensorManager sensorManager;
     private Sensor sensor;
     Button btnStart, btnStop;
-    TextView tvNetworkType, tvSendingSpeed, tvActiveApp, tvReceivingSpeed, tvMotionPosition;
+    TextView tvNetworkType, tvSendingSpeed, tvActiveApp, tvReceivingSpeed, tvMotionPosition, tvWifiStatus;
     ImageView ivDataTransmissionSettings;
 
     public BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
@@ -93,7 +93,9 @@ public class MainActivity extends AppCompatActivity {
     private void initUI() {
         tvNetworkType = (TextView) findViewById(R.id.tv_network_type);
         tvActiveApp = (TextView) findViewById(R.id.tv_active_app);
+        tvWifiStatus = (TextView) findViewById(R.id.tv_wifi_status);
         tvSendingSpeed = (TextView) findViewById(R.id.tv_sending_speed);
+        tvWifiStatus.setText("< "+SessionManager.getIntegerSetting(MainActivity.this, AllConstants.SESSION_KEY_DATA_LIMIT_SETTING, 10)+", def 10Kbps");
         tvReceivingSpeed = (TextView) findViewById(R.id.tv_receiving_speed);
         tvMotionPosition = (TextView) findViewById(R.id.tv_motion_position);
         ivDataTransmissionSettings = (ImageView) findViewById(R.id.iv_data_transmission_settings);
@@ -166,6 +168,13 @@ public class MainActivity extends AppCompatActivity {
                     public void onClick(DialogInterface dialog, int which) {
                     }
                 });
+
+        dialogBuilder.setOnDismissListener(new DialogInterface.OnDismissListener() {
+            @Override
+            public void onDismiss(DialogInterface dialog) {
+                tvWifiStatus.setText(SessionManager.getIntegerSetting(activity, AllConstants.SESSION_KEY_DATA_LIMIT_SETTING, 10) + "");
+            }
+        });
 
         AlertDialog dialog = dialogBuilder.create();
         dialog.show();

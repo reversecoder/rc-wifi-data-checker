@@ -11,6 +11,7 @@
 
     <string name="txt_none">None</string>
     <string name="title_active_app">Active App:</string>
+    <string name="title_wifi_status">WiFi OFF when speed:</string>
     <string name="title_sending_speed">Sending Speed:</string>
     <string name="title_receiving_speed">Receiving Speed:</string>
     <string name="title_motion_position">Motion:</string>
