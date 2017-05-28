@@ -172,7 +172,7 @@ public class MainActivity extends AppCompatActivity {
         dialogBuilder.setOnDismissListener(new DialogInterface.OnDismissListener() {
             @Override
             public void onDismiss(DialogInterface dialog) {
-                tvWifiStatus.setText(SessionManager.getIntegerSetting(activity, AllConstants.SESSION_KEY_DATA_LIMIT_SETTING, 10) + "");
+                tvWifiStatus.setText("< "+SessionManager.getIntegerSetting(MainActivity.this, AllConstants.SESSION_KEY_DATA_LIMIT_SETTING, 10)+", def 10Kbps");
             }
         });
 
