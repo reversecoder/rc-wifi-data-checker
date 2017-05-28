@@ -5,6 +5,7 @@ package com.reversecoder.wifidatachecker.util;
  */
 public class AllConstants {
 
+    public static final String SESSION_KEY_DATA_LIMIT_SETTING = "SESSION_KEY_DATA_LIMIT_SETTING";
     public static final String SESSION_KEY_MEASUREMENT_UNIT = "SESSION_KEY_MEASUREMENT_UNIT";
     public static final String SESSION_KEY_SHOW_TOTAL_VALUE = "SESSION_KEY_SHOW_TOTAL_VALUE";
     public static final String SESSION_KEY_POLL_RATE = "SESSION_KEY_POLL_RATE";

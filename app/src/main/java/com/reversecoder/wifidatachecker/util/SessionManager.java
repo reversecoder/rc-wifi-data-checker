@@ -36,4 +36,18 @@ public class SessionManager {
         return sp.getBoolean(key, defaultValue);
 
     }
+
+    public static void setIntegerSetting(Context context, String key, int value) {
+        SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(context);
+        Editor editor = sp.edit();
+        editor.putInt(key, value);
+        editor.commit();
+
+    }
+
+    public static int getIntegerSetting(Context context, String key, int defaultValue) {
+        SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(context);
+        return sp.getInt(key, defaultValue);
+
+    }
 }

@@ -1,17 +1,23 @@
 package com.reversecoder.wifidatachecker.activity;
 
+import android.app.Activity;
 import android.app.ActivityManager;
 import android.content.BroadcastReceiver;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.hardware.Sensor;
 import android.hardware.SensorManager;
 import android.os.Build;
 import android.os.Bundle;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.Button;
+import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -30,6 +36,7 @@ public class MainActivity extends AppCompatActivity {
     private Sensor sensor;
     Button btnStart, btnStop;
     TextView tvNetworkType, tvSendingSpeed, tvActiveApp, tvReceivingSpeed, tvMotionPosition;
+    ImageView ivDataTransmissionSettings;
 
     public BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
         @Override
@@ -68,6 +75,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void setApplicationBasicSettings() {
+        SessionManager.setIntegerSetting(MainActivity.this, AllConstants.SESSION_KEY_DATA_LIMIT_SETTING, 10);
         SessionManager.setStringSetting(MainActivity.this, AllConstants.SESSION_KEY_MEASUREMENT_UNIT, "Kbps");
         SessionManager.setBooleanSetting(MainActivity.this, AllConstants.SESSION_KEY_SHOW_TOTAL_VALUE, true);
         SessionManager.setStringSetting(MainActivity.this, AllConstants.SESSION_KEY_POLL_RATE, "5");
@@ -88,6 +96,7 @@ public class MainActivity extends AppCompatActivity {
         tvSendingSpeed = (TextView) findViewById(R.id.tv_sending_speed);
         tvReceivingSpeed = (TextView) findViewById(R.id.tv_receiving_speed);
         tvMotionPosition = (TextView) findViewById(R.id.tv_motion_position);
+        ivDataTransmissionSettings = (ImageView) findViewById(R.id.iv_data_transmission_settings);
 
         btnStart = (Button) findViewById(R.id.btn_start);
         btnStop = (Button) findViewById(R.id.btn_stop);
@@ -119,7 +128,49 @@ public class MainActivity extends AppCompatActivity {
                 }
             }
         });
+
+        ivDataTransmissionSettings.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                showWifiDataLimitDialog(MainActivity.this);
+            }
+        });
     }
+
+    private void showWifiDataLimitDialog(final Activity activity) {
+
+        AlertDialog.Builder dialogBuilder = new AlertDialog.Builder(activity);
+        LayoutInflater inflater = activity.getLayoutInflater();
+        final View dialogView = inflater.inflate(R.layout.dialog_wifi_data_limit, null);
+        dialogBuilder.setView(dialogView);
+
+        final EditText edtWifiDataLimit = (EditText) dialogView.findViewById(R.id.edt_wifi_data_limit);
+        edtWifiDataLimit.setText(SessionManager.getIntegerSetting(activity, AllConstants.SESSION_KEY_DATA_LIMIT_SETTING, 10) + "");
+
+        dialogBuilder.setTitle(activity.getString(R.string.dialog_title));
+        dialogBuilder.setMessage(activity.getString(R.string.dialog_message) + "(" + SessionManager.getStringSetting(activity, AllConstants.SESSION_KEY_MEASUREMENT_UNIT, "Kbps") + ")");
+        String positiveText = activity.getString(R.string.dialog_btn_ok);
+        String negativeText = activity.getString(R.string.dialog_btn_cancel);
+
+        dialogBuilder.setPositiveButton(positiveText,
+                new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        SessionManager.setIntegerSetting(activity, AllConstants.SESSION_KEY_DATA_LIMIT_SETTING, Integer.parseInt(edtWifiDataLimit.getText().toString()));
+                    }
+                });
+
+        dialogBuilder.setNegativeButton(negativeText,
+                new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                    }
+                });
+
+        AlertDialog dialog = dialogBuilder.create();
+        dialog.show();
+    }
+
 
     private void restartService() {
         stopService(new Intent(MainActivity.this, WifiDataCheckerService.class));

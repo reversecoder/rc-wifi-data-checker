@@ -15,4 +15,9 @@
     <string name="title_receiving_speed">Receiving Speed:</string>
     <string name="title_motion_position">Motion:</string>
 
+    <string name="dialog_title">Wifi data limit</string>
+    <string name="dialog_message">Set your wifi data limit value</string>
+    <string name="dialog_btn_ok">OK</string>
+    <string name="dialog_btn_cancel">CANCEL</string>
+
 </resources>

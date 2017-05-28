@@ -379,7 +379,7 @@ public class WifiDataCheckerService extends Service implements OnTiltCallback {
         sendBroadcast(broadcastIntentActivityUpdate);
 
         if (isNoTilt) {
-            if (mBytesReceivedPerSecond < 4) {
+            if (mBytesReceivedPerSecond < SessionManager.getIntegerSetting(this, AllConstants.SESSION_KEY_DATA_LIMIT_SETTING, 10)) {
                 if (orientationListener.getWifiDataController().isWifiEnable()) {
                     orientationListener.getWifiDataController().disableWifi();
                     isWifiDisabled = true;
