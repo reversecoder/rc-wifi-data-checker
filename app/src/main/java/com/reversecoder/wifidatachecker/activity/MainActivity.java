@@ -11,6 +11,7 @@ import android.hardware.Sensor;
 import android.hardware.SensorManager;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.CountDownTimer;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.view.LayoutInflater;
@@ -35,7 +36,7 @@ public class MainActivity extends AppCompatActivity {
     private SensorManager sensorManager;
     private Sensor sensor;
     Button btnStart, btnStop;
-    TextView tvNetworkType, tvSendingSpeed, tvActiveApp, tvReceivingSpeed, tvMotionPosition, tvWifiStatus;
+    TextView tvNetworkType, tvSendingSpeed, tvActiveApp, tvReceivingSpeed, tvMotionPosition, tvWifiSpeedSetting, tvWifiStatus;
     ImageView ivDataTransmissionSettings;
 
     public BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
@@ -70,8 +71,6 @@ public class MainActivity extends AppCompatActivity {
         tvSendingSpeed.setText(strByteSent);
         tvMotionPosition.setText(strMotion);
         tvNetworkType.setText(WifiDataCheckerUtil.checkNetworkStatus(MainActivity.this));
-
-//        tvWifiData.setText("Active app: " + strActiveApp + "\n" + "Byte sent: " + strByteSent + "\n" + "Byte received: " + strByteReceived);
     }
 
     private void setApplicationBasicSettings() {
@@ -93,9 +92,9 @@ public class MainActivity extends AppCompatActivity {
     private void initUI() {
         tvNetworkType = (TextView) findViewById(R.id.tv_network_type);
         tvActiveApp = (TextView) findViewById(R.id.tv_active_app);
+        tvWifiSpeedSetting = (TextView) findViewById(R.id.tv_wifi_speed_setting);
         tvWifiStatus = (TextView) findViewById(R.id.tv_wifi_status);
         tvSendingSpeed = (TextView) findViewById(R.id.tv_sending_speed);
-        tvWifiStatus.setText("< "+SessionManager.getIntegerSetting(MainActivity.this, AllConstants.SESSION_KEY_DATA_LIMIT_SETTING, 10)+", def 10Kbps");
         tvReceivingSpeed = (TextView) findViewById(R.id.tv_receiving_speed);
         tvMotionPosition = (TextView) findViewById(R.id.tv_motion_position);
         ivDataTransmissionSettings = (ImageView) findViewById(R.id.iv_data_transmission_settings);
@@ -104,6 +103,20 @@ public class MainActivity extends AppCompatActivity {
         btnStop = (Button) findViewById(R.id.btn_stop);
 
         tvNetworkType.setText(WifiDataCheckerUtil.checkNetworkStatus(MainActivity.this));
+        tvWifiSpeedSetting.setText("< " + SessionManager.getIntegerSetting(MainActivity.this, AllConstants.SESSION_KEY_DATA_LIMIT_SETTING, 10) + ", def 10Kbps");
+
+//        CountDownTimer wifiOffWaiting = new CountDownTimer(61000, 1000) {
+//            @Override
+//            public void onTick(long millisUntilFinished) {
+//                long diffSeconds = millisUntilFinished / 1000 % 60;
+//                tvWifiStatus.setText(diffSeconds + "s");
+//            }
+//
+//            @Override
+//            public void onFinish() {
+//                tvWifiStatus.setText(getString(R.string.txt_none));
+//            }
+//        }.start();
     }
 
     private void initActions() {
@@ -116,6 +129,8 @@ public class MainActivity extends AppCompatActivity {
                 } else {
                     Toast.makeText(MainActivity.this, "Service is running", Toast.LENGTH_SHORT).show();
                 }
+
+                tvWifiStatus.setText(getString(R.string.txt_none));
             }
         });
 
@@ -128,6 +143,8 @@ public class MainActivity extends AppCompatActivity {
                 } else {
                     Toast.makeText(MainActivity.this, "Please start the service first", Toast.LENGTH_SHORT).show();
                 }
+
+                tvWifiStatus.setText(getString(R.string.txt_none));
             }
         });
 
@@ -172,7 +189,7 @@ public class MainActivity extends AppCompatActivity {
         dialogBuilder.setOnDismissListener(new DialogInterface.OnDismissListener() {
             @Override
             public void onDismiss(DialogInterface dialog) {
-                tvWifiStatus.setText("< "+SessionManager.getIntegerSetting(MainActivity.this, AllConstants.SESSION_KEY_DATA_LIMIT_SETTING, 10)+", def 10Kbps");
+                tvWifiSpeedSetting.setText("< " + SessionManager.getIntegerSetting(MainActivity.this, AllConstants.SESSION_KEY_DATA_LIMIT_SETTING, 10) + ", def 10Kbps");
             }
         });
 
