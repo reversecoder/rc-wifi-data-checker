@@ -7,14 +7,15 @@ import android.app.Application;
  */
 public class WifiDataCheckerApplication extends Application {
 
-  private static WifiDataCheckerApplication instance;
+    private static WifiDataCheckerApplication instance;
 
-  @Override public void onCreate() {
-    super.onCreate();
-    instance = this;
-  }
+    @Override
+    public void onCreate() {
+        super.onCreate();
+        instance = this;
+    }
 
-  public static WifiDataCheckerApplication getInstance() {
-    return instance;
-  }
+    public static WifiDataCheckerApplication getInstance() {
+        return instance;
+    }
 }

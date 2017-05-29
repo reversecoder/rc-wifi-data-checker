@@ -15,9 +15,9 @@ import android.os.IBinder;
 import android.os.PowerManager;
 
 import com.reversecoder.wifidatachecker.R;
-import com.reversecoder.wifidatachecker.interfaces.OnTiltCallback;
+import com.reversecoder.wifidatachecker.interfaces.DeviceOrientationChangedCallback;
 import com.reversecoder.wifidatachecker.interfaces.UnitConverter;
-import com.reversecoder.wifidatachecker.listener.OrientationListener;
+import com.reversecoder.wifidatachecker.listener.DeviceOrientationListener;
 import com.reversecoder.wifidatachecker.model.AppDataUsage;
 import com.reversecoder.wifidatachecker.util.AllConstants;
 import com.reversecoder.wifidatachecker.util.SessionManager;
@@ -33,12 +33,12 @@ import static com.reversecoder.wifidatachecker.util.AllConstants.INTENT_FILTER_A
 import static com.reversecoder.wifidatachecker.util.AllConstants.KEY_INTENT_ACTIVE_APP;
 import static com.reversecoder.wifidatachecker.util.AllConstants.KEY_INTENT_BYTE_RECEIVED_PER_SECOND;
 import static com.reversecoder.wifidatachecker.util.AllConstants.KEY_INTENT_BYTE_SENT_PER_SECOND;
-import static com.reversecoder.wifidatachecker.util.AllConstants.KEY_INTENT_MOTION;
+import static com.reversecoder.wifidatachecker.util.AllConstants.KEY_INTENT_ORIENTATION_ANGLE;
 
 /**
  * @author Md. Rashadul Alam
  */
-public class WifiDataCheckerService extends Service implements OnTiltCallback {
+public class WifiDataCheckerService extends Service implements DeviceOrientationChangedCallback {
 
     Intent broadcastIntentActivityUpdate;
 
@@ -65,20 +65,21 @@ public class WifiDataCheckerService extends Service implements OnTiltCallback {
     private boolean firstUpdate;
     private PackageManager packageManager;
 
-    private ScheduledFuture updateHandler;
+    private ScheduledFuture wifiDataUpdateHandler;
+
+    private ScheduledFuture uiUpdateHandler;
 
     private long start = 0l;
 
     private double totalSecondsSinceLastPackageRefresh = 0d;
     private double totalSecondsSinceNotificaitonTimeUpdated = 0d;
 
-    OrientationListener orientationListener;
-
-    boolean isWifiDisabled = false;
-
-    boolean isNoTilt = false;
+    DeviceOrientationListener deviceOrientationListener;
 
     double mBytesReceivedPerSecond = 0.0;
+    double mBytesSentPerSecond = 0.0;
+    String mActiveApp = "";
+    int mOrientationAngle = 0;
 
     @Override
     public void onCreate() {
@@ -89,7 +90,7 @@ public class WifiDataCheckerService extends Service implements OnTiltCallback {
     private void createService(final Service service) {
         firstUpdate = true;
 
-        orientationListener = OrientationListener.getInstance(this, SensorManager.SENSOR_DELAY_UI);
+        deviceOrientationListener = DeviceOrientationListener.getInstance(this, SensorManager.SENSOR_DELAY_UI);
 
         broadcastIntentActivityUpdate = new Intent(INTENT_FILTER_ACTIVITY_UPDATE);
 
@@ -146,9 +147,11 @@ public class WifiDataCheckerService extends Service implements OnTiltCallback {
     @Override
     public void onDestroy() {
         try {
-            updateHandler.cancel(true);
-            orientationListener.disable();
-        } catch (NullPointerException e) {
+            wifiDataUpdateHandler.cancel(true);
+            uiUpdateHandler.cancel(true);
+            deviceOrientationListener.disable();
+        } catch (Exception e) {
+            e.printStackTrace();
         }
         super.onDestroy();
     }
@@ -176,8 +179,8 @@ public class WifiDataCheckerService extends Service implements OnTiltCallback {
             //            }
         }
 
-        orientationListener.enable();
-        orientationListener.getWifiDataController().setOnTiltCallback(this);
+        deviceOrientationListener.enable();
+        deviceOrientationListener.setDeviceOrientationChangedCallback(this);
 
         return START_STICKY;
     }
@@ -203,7 +206,7 @@ public class WifiDataCheckerService extends Service implements OnTiltCallback {
 
     private UnitConverter getUnitConverter(String unitMeasurement) {
 
-        if (unitMeasurement.equals("bps")) {
+        if (unitMeasurement.equals("b/s")) {
             return (new UnitConverter() {
                 @Override
                 public double convert(double bytesPerSecond) {
@@ -211,7 +214,7 @@ public class WifiDataCheckerService extends Service implements OnTiltCallback {
                 }
             });
         }
-        if (unitMeasurement.equals("Kbps")) {
+        if (unitMeasurement.equals("Kb/s")) {
             return (new UnitConverter() {
                 @Override
                 public double convert(double bytesPerSecond) {
@@ -219,7 +222,7 @@ public class WifiDataCheckerService extends Service implements OnTiltCallback {
                 }
             });
         }
-        if (unitMeasurement.equals("Mbps")) {
+        if (unitMeasurement.equals("Mb/s")) {
             return (new UnitConverter() {
                 @Override
                 public double convert(double bytesPerSecond) {
@@ -227,7 +230,7 @@ public class WifiDataCheckerService extends Service implements OnTiltCallback {
                 }
             });
         }
-        if (unitMeasurement.equals("Gbps")) {
+        if (unitMeasurement.equals("Gb/s")) {
             return (new UnitConverter() {
                 @Override
                 public double convert(double bytesPerSecond) {
@@ -235,7 +238,7 @@ public class WifiDataCheckerService extends Service implements OnTiltCallback {
                 }
             });
         }
-        if (unitMeasurement.equals("Bps")) {
+        if (unitMeasurement.equals("B/s")) {
             return (new UnitConverter() {
                 @Override
                 public double convert(double bytesPerSecond) {
@@ -243,7 +246,7 @@ public class WifiDataCheckerService extends Service implements OnTiltCallback {
                 }
             });
         }
-        if (unitMeasurement.equals("KBps")) {
+        if (unitMeasurement.equals("KB/s")) {
             return (new UnitConverter() {
                 @Override
                 public double convert(double bytesPerSecond) {
@@ -251,7 +254,7 @@ public class WifiDataCheckerService extends Service implements OnTiltCallback {
                 }
             });
         }
-        if (unitMeasurement.equals("MBps")) {
+        if (unitMeasurement.equals("MB/s")) {
             return (new UnitConverter() {
                 @Override
                 public double convert(double bytesPerSecond) {
@@ -259,7 +262,7 @@ public class WifiDataCheckerService extends Service implements OnTiltCallback {
                 }
             });
         }
-        if (unitMeasurement.equals("GBps")) {
+        if (unitMeasurement.equals("GB/s")) {
             return (new UnitConverter() {
                 @Override
                 public double convert(double bytesPerSecond) {
@@ -277,17 +280,26 @@ public class WifiDataCheckerService extends Service implements OnTiltCallback {
     }
 
     private void startUpdateService(long pollRate) {
-        final Runnable updater = new Runnable() {
+        final Runnable wifiDataUpdater = new Runnable() {
             public void run() {
-                update();
+                wifiDataUpdate();
             }
         };
+
+        final Runnable uiUpdater = new Runnable() {
+            public void run() {
+                //send wifiDataUpdate to ui
+                sendUpdateToActivity();
+            }
+        };
+
         ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
-        updateHandler = scheduler.scheduleAtFixedRate(updater, 0, pollRate, TimeUnit.SECONDS);
+        wifiDataUpdateHandler = scheduler.scheduleAtFixedRate(wifiDataUpdater, 0, pollRate, TimeUnit.SECONDS);
+        uiUpdateHandler = scheduler.scheduleAtFixedRate(uiUpdater, 0, 1, TimeUnit.SECONDS);
     }
 
     @SuppressWarnings("deprecation")
-    private void update() {
+    private void wifiDataUpdate() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
             if (!pm.isInteractive()) {
                 return;
@@ -350,58 +362,36 @@ public class WifiDataCheckerService extends Service implements OnTiltCallback {
             }
         }
 
-        //send update to the notification bar
+        //send wifiDataUpdate to the notification bar
         if (notificationEnabled) {
             updateNotification(bytesSentPerSecond, bytesReceivedPerSecond, activeApp);
         }
 
-        //send update to ui
-        sendUpdateToActivity(bytesSentPerSecond, bytesReceivedPerSecond, activeApp);
-    }
-
-    private void sendUpdateToActivity(double bytesSentPerSecond, double bytesReceivedPerSecond, String activeApp) {
+        //assigned converted global variable
         String sentString = String.format("%.3f", (converter.convert(bytesSentPerSecond)));
         String receivedString = String.format("%.3f", (converter.convert(bytesReceivedPerSecond)));
         try {
             mBytesReceivedPerSecond = Double.parseDouble(receivedString);
+            mBytesSentPerSecond = Double.parseDouble(sentString);
+            mActiveApp = activeApp;
         } catch (Exception ex) {
             ex.printStackTrace();
         }
+    }
 
-        broadcastIntentActivityUpdate.putExtra(KEY_INTENT_BYTE_SENT_PER_SECOND, sentString + " " + unitMeasurement);
-        broadcastIntentActivityUpdate.putExtra(KEY_INTENT_BYTE_RECEIVED_PER_SECOND, receivedString + " " + unitMeasurement);
-        broadcastIntentActivityUpdate.putExtra(KEY_INTENT_ACTIVE_APP, activeApp);
-        if (isNoTilt) {
-            broadcastIntentActivityUpdate.putExtra(KEY_INTENT_MOTION, "No Tilt");
-        } else {
-            broadcastIntentActivityUpdate.putExtra(KEY_INTENT_MOTION, "Tilt");
-        }
+    private void sendUpdateToActivity() {
+
+        broadcastIntentActivityUpdate.putExtra(KEY_INTENT_BYTE_SENT_PER_SECOND, mBytesSentPerSecond + " " + unitMeasurement);
+        broadcastIntentActivityUpdate.putExtra(KEY_INTENT_BYTE_RECEIVED_PER_SECOND, mBytesReceivedPerSecond + " " + unitMeasurement);
+        broadcastIntentActivityUpdate.putExtra(KEY_INTENT_ACTIVE_APP, mActiveApp);
+        broadcastIntentActivityUpdate.putExtra(KEY_INTENT_ORIENTATION_ANGLE, mOrientationAngle + "");
+
         sendBroadcast(broadcastIntentActivityUpdate);
-
-        if (isNoTilt) {
-            if (mBytesReceivedPerSecond < SessionManager.getIntegerSetting(this, AllConstants.SESSION_KEY_DATA_LIMIT_SETTING, 10)) {
-                if (orientationListener.getWifiDataController().isWifiEnable()) {
-                    orientationListener.getWifiDataController().disableWifi();
-                    isWifiDisabled = true;
-                }
-            }
-        }
     }
 
     @Override
-    public void getTiltCallback(boolean isOrientationChanged) {
-
-        isNoTilt = isOrientationChanged;
-
-        if (isOrientationChanged) {
-//            Toast.makeText(this, "No tilt", Toast.LENGTH_SHORT).show();
-        } else {
-//            Toast.makeText(this, "Tilt", Toast.LENGTH_SHORT).show();
-            if (!orientationListener.getWifiDataController().isWifiEnable() && isWifiDisabled) {
-                orientationListener.getWifiDataController().enableWifi();
-                isWifiDisabled = false;
-            }
-        }
+    public void onDeviceOrientationChanged(int orientation) {
+        mOrientationAngle = orientation;
     }
 
     private void updateNotification(double bytesSentPerSecond, double bytesReceivedPerSecond, String activeApp) {

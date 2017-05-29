@@ -12,7 +12,7 @@
     <string name="txt_none">None</string>
     <string name="txt_running">Running</string>
     <string name="title_active_app">Active App:</string>
-    <string name="title_wifi_speed_setting">WiFi OFF when speed:</string>
+    <string name="title_wifi_speed_setting">Wifi off when speed:</string>
     <string name="title_wifi_status">Waiting for turning wifi off:</string>
     <string name="title_sending_speed">Sending Speed:</string>
     <string name="title_receiving_speed">Receiving Speed:</string>

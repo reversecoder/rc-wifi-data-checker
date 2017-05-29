@@ -4,6 +4,7 @@ import android.app.ActivityManager;
 import android.content.Context;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
+import android.net.wifi.WifiManager;
 
 /**
  * @author Md. Rashadul Alam
@@ -37,5 +38,28 @@ public class WifiDataCheckerUtil {
             networkStatus = "None";
         }
         return networkStatus;
+    }
+
+    public static void enableWifi(Context context) {
+        WifiManager wifiManager = (WifiManager) context.getSystemService(Context.WIFI_SERVICE);
+        if (wifiManager.getWifiState() == WifiManager.WIFI_STATE_DISABLED) {
+            wifiManager.setWifiEnabled(true);
+        }
+    }
+
+    public static void disableWifi(Context context) {
+        WifiManager wifiManager = (WifiManager) context.getSystemService(Context.WIFI_SERVICE);
+        if (wifiManager.getWifiState() == WifiManager.WIFI_STATE_ENABLED) {
+            wifiManager.setWifiEnabled(false);
+        }
+    }
+
+
+    public static boolean isWifiEnable(Context context) {
+        WifiManager wifiManager = (WifiManager) context.getSystemService(Context.WIFI_SERVICE);
+        if (wifiManager.getWifiState() == WifiManager.WIFI_STATE_ENABLED) {
+            return true;
+        }
+        return false;
     }
 }
